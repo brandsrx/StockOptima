@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { InventoryTable } from "@/components/inventory/InventoryTable";
 import { CSVUploadButton } from "@/components/inventory/CSVUploadButton";
@@ -11,12 +11,20 @@ export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getProducts().then((data) => {
+  const fetchProducts = useCallback(async () => {
+    try {
+      const data = await getProducts();
       setProducts(data);
+    } catch {
+      setProducts([]);
+    } finally {
       setLoading(false);
-    });
+    }
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   if (loading) {
     return (
@@ -31,10 +39,17 @@ export default function InventoryPage() {
       <PageHeader
         title="Inventario"
         description="Gestiona el catálogo completo de productos"
-        actions={<CSVUploadButton />}
+        actions={<CSVUploadButton onUploadComplete={fetchProducts} />}
       />
 
-      <InventoryTable products={products} />
+      {products.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 text-sm text-gray-400 space-y-3">
+          <p>No hay productos en el inventario.</p>
+          <p>Sube un archivo CSV o Excel para comenzar.</p>
+        </div>
+      ) : (
+        <InventoryTable products={products} />
+      )}
     </div>
   );
 }

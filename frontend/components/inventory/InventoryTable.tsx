@@ -28,13 +28,22 @@ export function InventoryTable({ products }: InventoryTableProps) {
                   Nombre
                 </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Costo Unitario
+                  Costo
                 </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock Actual
+                  Stock
                 </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tiempo Entrega
+                  Q*
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Reorden
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  SS
+                </th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Entrega
                 </th>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Estado
@@ -73,8 +82,17 @@ export function InventoryTable({ products }: InventoryTableProps) {
                       {product.current_stock}
                     </span>
                   </td>
+                  <td className="px-6 py-3.5 font-medium text-gray-900">
+                    {product.economic_order_quantity}
+                  </td>
                   <td className="px-6 py-3.5 text-gray-700">
-                    {product.lead_time_days} días
+                    {product.reorder_point}
+                  </td>
+                  <td className="px-6 py-3.5 text-gray-500">
+                    {product.safety_stock}
+                  </td>
+                  <td className="px-6 py-3.5 text-gray-700">
+                    {product.lead_time_days}d
                   </td>
                   <td className="px-6 py-3.5">
                     {getStatusBadge(product.status)}

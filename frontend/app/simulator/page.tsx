@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { EOQResults, CostBreakdown } from "@/components/simulator/EOQResults";
 import { ReorderAlert } from "@/components/simulator/ReorderAlert";
 import { getProducts } from "@/services/apiService";
-import {
-  calculateEOQ,
-  calculateReorderPoint,
-  calculateTotalAnnualCost,
-  calculateHoldingCost,
-  calculateOrderingCost,
-} from "@/lib/calculations";
 import type { Product } from "@/types";
 import { ChevronDown } from "lucide-react";
 
@@ -21,13 +14,21 @@ export default function SimulatorPage() {
   const [selectedSku, setSelectedSku] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getProducts().then((data) => {
+  const fetchProducts = useCallback(async () => {
+    try {
+      const data = await getProducts();
       setProducts(data);
-      if (data.length > 0) setSelectedSku(data[0].sku);
+      if (data.length > 0 && !selectedSku) setSelectedSku(data[0].sku);
+    } catch {
+      setProducts([]);
+    } finally {
       setLoading(false);
-    });
-  }, []);
+    }
+  }, [selectedSku]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const selectedProduct = useMemo(
     () => products.find((p) => p.sku === selectedSku),
@@ -36,42 +37,34 @@ export default function SimulatorPage() {
 
   const results = useMemo(() => {
     if (!selectedProduct) return null;
-
-    const eoq = calculateEOQ(
-      selectedProduct.annual_demand_estimated,
-      selectedProduct.ordering_cost,
-      selectedProduct.holding_cost_rate,
-      selectedProduct.cost
-    );
-    const reorderPoint = calculateReorderPoint(
-      selectedProduct.annual_demand_estimated,
-      selectedProduct.lead_time_days
-    );
-    const totalCost = calculateTotalAnnualCost(
-      selectedProduct.annual_demand_estimated,
-      selectedProduct.ordering_cost,
-      selectedProduct.holding_cost_rate,
-      selectedProduct.cost,
-      eoq
-    );
-    const holdingCost = calculateHoldingCost(
-      eoq,
-      selectedProduct.cost,
-      selectedProduct.holding_cost_rate
-    );
-    const orderingCost = calculateOrderingCost(
-      selectedProduct.annual_demand_estimated,
-      eoq,
-      selectedProduct.ordering_cost
-    );
-
-    return { eoq, reorderPoint, totalCost, holdingCost, orderingCost };
+    return {
+      eoq: selectedProduct.economic_order_quantity,
+      reorderPoint: selectedProduct.reorder_point,
+      totalCost: selectedProduct.total_annual_cost,
+      holdingCost: selectedProduct.holding_cost,
+      orderingCost: selectedProduct.ordering_cost_total,
+    };
   }, [selectedProduct]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-sm text-gray-400">Cargando simulador...</div>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div>
+        <PageHeader
+          title="Simulador EOQ"
+          description="Calcula la cantidad económica de pedido y el punto de reorden óptimo"
+        />
+        <div className="flex flex-col items-center justify-center h-64 text-sm text-gray-400 space-y-3">
+          <p>No hay productos para simular.</p>
+          <p>Sube un inventario primero desde la sección Inventario.</p>
+        </div>
       </div>
     );
   }
@@ -167,6 +160,35 @@ export default function SimulatorPage() {
               holdingCost={results.holdingCost}
               orderingCost={results.orderingCost}
             />
+
+            {selectedProduct.safety_stock > 0 && (
+              <Card>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Stock de Seguridad (SS)</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        {selectedProduct.safety_stock} unidades
+                      </p>
+                    </div>
+                    <div className="ml-6">
+                      <p className="text-xs text-gray-500">Costo de Backorders</p>
+                      <p className="text-lg font-bold text-gray-900">
+                        ${selectedProduct.backorder_cost.toLocaleString("es-MX")}
+                      </p>
+                    </div>
+                    {selectedProduct.discount_applied && (
+                      <div className="ml-6">
+                        <p className="text-xs text-emerald-600 font-medium">Descuento Disponible</p>
+                        <p className="text-sm text-gray-700">
+                          Pedir {selectedProduct.discount_quantity} uds a ${selectedProduct.discount_price}/ud
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </>
         )}
       </div>

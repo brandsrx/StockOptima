@@ -1,45 +1,80 @@
-# StockOptima 📦⚙️
+# StockOptima
 
-**StockOptima** es un motor y sistema de optimización de inventarios diseñado para funcionar de manera universal en cualquier tipo de comercio (ferreterías, farmacias, tiendas de ropa, minimarkets, etc.), sin importar el rubro. Su propósito principal es automatizar las decisiones financieras y logísticas del inventario, resolviendo mediante modelos matemáticos de investigación operativa el dilema clásico de **cuánto** y **cuándo** reabastecer para minimizar los costos totales de almacenamiento y gestión.
+Sistema universal de optimizacion de inventarios para pequenos y medianos comercios. Automatiza las decisiones financieras y logisticas del inventario mediante modelos matematicos de investigacion operativa.
 
----
+## Arquitectura
 
-## 🚀 Características Principales
+```
+StockOptima/
+├── backend/          Python (FastAPI)
+│   ├── app.py        Endpoints REST API
+│   ├── motor.py      Motor matematico (EOQ, SS, backorders, pronostico)
+│   ├── database.py   SQLite para persistencia
+│   ├── schemas.py    Modelos Pydantic
+│   └── requirements.txt
+│
+└── frontend/         Next.js (React + TypeScript + Tailwind)
+    ├── app/          Paginas: Dashboard, Inventario, Simulador, Configuracion
+    ├── components/   Componentes UI reutilizables
+    ├── services/     Cliente API conectado al backend
+    ├── types/        Definiciones TypeScript
+    └── data/         Datos mock (fallback)
+```
 
-* **Agnóstico al Producto:** Se adapta a cualquier catálogo de productos de manera universal utilizando campos estándar como SKU, costo unitario, stock actual y tiempo de entrega del proveedor.
-* **Núcleo Matemático de Investigación Operativa:** Automatiza el cálculo de la Cantidad Económica de Pedido ($Q^*$), el punto de reorden ($r$) y evalúa escenarios complejos como faltantes planeados (*backorders*) y descuentos por volumen.
-* **Modelado Estocástico y de Demanda:** Estima la demanda esperada y calcula de forma dinámica los stocks de seguridad basándose en niveles de servicio objetivo (probabilidades de no quiebre de stock).
-* **Reportes Operativos Claros:** Traduce fórmulas matemáticas complejas en alertas visuales de reabastecimiento y métricas de control de inventario listas para el comerciante.
+## Motor Matematico
 
----
+- **EOQ (Q\*)**: Cantidad Economica de Pedido `sqrt(2DS/H)`
+- **Stock de Seguridad**: Distribucion Normal y Poisson con nivel de servicio configurable
+- **Punto de Reorden (r)**: Demanda durante entrega + stock de seguridad
+- **Costos Totales**: TC = (D/Q)S + (Q/2)H + DC
+- **Backorders**: Penalizacion por faltantes planeados
+- **Descuentos por Volumen**: Evaluacion automatica de descuentos del proveedor
+- **Pronostico de Demanda**: Promedio movil y suavizamiento exponencial
 
-## 🛠️ Arquitectura y División del Trabajo
+## Como Ejecutar
 
-El proyecto está estructurado para ser desarrollado eficientemente entre **dos integrantes**:
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app:app --reload --port 8000
+```
 
-### Integrante 1: Backend, Lógica Matemática y Motor de Inventarios
-* **Fase 1 (Configuración e Importación):** Estructura de datos genérica para los productos y lector/validador de archivos de inventario (CSV/Excel).
-* **Fase 2 (El Cerebro Matemático):** Programación de las fórmulas analíticas de Investigación Operativa ($Q^*$, $r$, costos totales, faltantes planeados y descuentos por volumen).
-* **Fase 3 (Pronóstico de Demanda):** Algoritmos de cálculo de demanda esperada y stock de seguridad probabilístico.
+### Frontend
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
 
-### Integrante 2: Interfaz, Reportes y Gestión de Datos
-* **Fase 1 (Almacenamiento):** Configuración de la base de datos (SQLite o PostgreSQL) para guardar los parámetros globales y el catálogo.
-* **Fase 4 (Panel de Control y Reportes):** Desarrollo de la interfaz de usuario para la carga de datos y visualización del inventario.
-* **Fase 4 (Sistema de Alertas y Métricas):** Generación de reportes de productos críticos en punto de reorden, cantidades exactas de pedido y cálculo del capital inmovilizado.
+El frontend corre en `http://localhost:3000` y proxies las llamadas `/api/v1/*` al backend en `http://localhost:8000`.
 
----
+## Endpoints API
 
-## ⚙️ Requisitos Técnicos
+| Metodo | Ruta | Descripcion |
+|--------|------|-------------|
+| GET | `/api/v1/productos` | Lista productos con calculos |
+| GET | `/api/v1/productos/{sku}` | Detalle de un producto |
+| POST | `/api/v1/inventario/cargar` | Subir CSV/Excel del inventario |
+| GET | `/api/v1/configuracion` | Obtener parametros globales |
+| POST | `/api/v1/configuracion` | Actualizar parametros |
+| GET | `/api/v1/dashboard/resumen` | KPIs y metricas agregadas |
 
-* **Python 3.10+**
-* Librerías recomendadas: `NumPy`, `SciPy`, `Pandas`, `FastAPI` (para la capa de servicios opcional).
+## Formato de Archivo de Inventario
 
-- **Node 20+**
+CSV o Excel con estas columnas:
 
----
+| Columna | Requerida | Descripcion |
+|---------|-----------|-------------|
+| SKU | Si | Codigo unico del producto |
+| Nombre | Si | Nombre del producto |
+| Costo Unitario | Si | Costo por unidad |
+| Stock Actual | Si | Unidades en inventario |
+| Tiempo Entrega | Si | Dias de entrega del proveedor |
+| Proveedor | No | Nombre del proveedor |
+| Demanda Anual | No | Demanda estimada anual |
 
-## 📌 Contribución y Uso Académico
+## Tecnologias
 
-Este proyecto surge como una herramienta práctica para llevar los modelos cuantitativos de los libros de texto y la investigación operativa directamente a entornos comerciales reales y accesibles.
-
-
+- **Backend**: Python 3.10+, FastAPI, NumPy, SciPy, Pandas, SQLite
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS, Chart.js
