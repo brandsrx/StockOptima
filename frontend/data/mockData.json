@@ -1,0 +1,139 @@
+{
+  "products": [
+    {
+      "sku": "TORN-001",
+      "name": "Caja de Tornillos Autorroscantes",
+      "cost": 15.50,
+      "current_stock": 45,
+      "lead_time_days": 3,
+      "annual_demand_estimated": 600,
+      "ordering_cost": 25.00,
+      "holding_cost_rate": 0.20,
+      "economic_order_quantity": 120,
+      "reorder_point": 50,
+      "status": "Crítico"
+    },
+    {
+      "sku": "FILT-042",
+      "name": "Filtro de Aceite Universal",
+      "cost": 8.75,
+      "current_stock": 320,
+      "lead_time_days": 5,
+      "annual_demand_estimated": 1200,
+      "ordering_cost": 30.00,
+      "holding_cost_rate": 0.18,
+      "economic_order_quantity": 203,
+      "reorder_point": 180,
+      "status": "Óptimo"
+    },
+    {
+      "sku": "PINT-015",
+      "name": "Pintura Blanca Látex 1Gal",
+      "cost": 22.00,
+      "current_stock": 28,
+      "lead_time_days": 7,
+      "annual_demand_estimated": 400,
+      "ordering_cost": 35.00,
+      "holding_cost_rate": 0.22,
+      "economic_order_quantity": 111,
+      "reorder_point": 85,
+      "status": "Crítico"
+    },
+    {
+      "sku": "CERR-008",
+      "name": "Cerradura de Seguridad Premium",
+      "cost": 45.00,
+      "current_stock": 15,
+      "lead_time_days": 10,
+      "annual_demand_estimated": 180,
+      "ordering_cost": 40.00,
+      "holding_cost_rate": 0.20,
+      "economic_order_quantity": 57,
+      "reorder_point": 55,
+      "status": "Crítico"
+    },
+    {
+      "sku": "ADHS-003",
+      "name": "Adhesivo Industrial 500ml",
+      "cost": 6.30,
+      "current_stock": 95,
+      "lead_time_days": 4,
+      "annual_demand_estimated": 800,
+      "ordering_cost": 20.00,
+      "holding_cost_rate": 0.15,
+      "economic_order_quantity": 146,
+      "reorder_point": 98,
+      "status": "Crítico"
+    },
+    {
+      "sku": "TIJA-021",
+      "name": "Tija de Acero Inoxidable 3/8",
+      "cost": 3.25,
+      "current_stock": 500,
+      "lead_time_days": 2,
+      "annual_demand_estimated": 2000,
+      "ordering_cost": 15.00,
+      "holding_cost_rate": 0.18,
+      "economic_order_quantity": 354,
+      "reorder_point": 123,
+      "status": "Óptimo"
+    },
+    {
+      "sku": "CABL-007",
+      "name": "Cable Eléctrico 12AWG (rollo 100m)",
+      "cost": 35.00,
+      "current_stock": 42,
+      "lead_time_days": 6,
+      "annual_demand_estimated": 250,
+      "ordering_cost": 28.00,
+      "holding_cost_rate": 0.20,
+      "economic_order_quantity": 60,
+      "reorder_point": 52,
+      "status": "En Reorden"
+    },
+    {
+      "sku": "HERR-012",
+      "name": "Juego de Llaves Allen (10 pzas)",
+      "cost": 12.50,
+      "current_stock": 75,
+      "lead_time_days": 4,
+      "annual_demand_estimated": 350,
+      "ordering_cost": 22.00,
+      "holding_cost_rate": 0.19,
+      "economic_order_quantity": 90,
+      "reorder_point": 55,
+      "status": "Óptimo"
+    },
+    {
+      "sku": "TALB-005",
+      "name": "Talabo Percutor 1/2 (herramienta)",
+      "cost": 189.00,
+      "current_stock": 6,
+      "lead_time_days": 14,
+      "annual_demand_estimated": 60,
+      "ordering_cost": 50.00,
+      "holding_cost_rate": 0.25,
+      "economic_order_quantity": 16,
+      "reorder_point": 24,
+      "status": "Crítico"
+    },
+    {
+      "sku": "SILR-009",
+      "name": "Silicone Sellador Transparente",
+      "cost": 4.80,
+      "current_stock": 140,
+      "lead_time_days": 3,
+      "annual_demand_estimated": 900,
+      "ordering_cost": 18.00,
+      "holding_cost_rate": 0.16,
+      "economic_order_quantity": 145,
+      "reorder_point": 82,
+      "status": "Óptimo"
+    }
+  ],
+  "settings": {
+    "holding_cost_rate": 0.20,
+    "ordering_cost": 25.00,
+    "service_level": 0.95
+  }
+}
