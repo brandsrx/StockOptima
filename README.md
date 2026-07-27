@@ -42,6 +42,4 @@ El proyecto está estructurado para ser desarrollado eficientemente entre **dos 
 
 Este proyecto surge como una herramienta práctica para llevar los modelos cuantitativos de los libros de texto y la investigación operativa directamente a entornos comerciales reales y accesibles.
 
-```
 
-```
