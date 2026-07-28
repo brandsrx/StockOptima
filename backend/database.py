@@ -1,3 +1,8 @@
+"""
+StockOptima — Base de datos SQLite
+Persistencia simple para productos y configuración.
+"""
+
 import sqlite3
 import json
 from typing import Optional
@@ -32,9 +37,12 @@ def init_db():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS configuracion (
             id INTEGER PRIMARY KEY CHECK (id = 1),
+            nombre_negocio TEXT DEFAULT 'Mi Negocio',
             holding_cost_rate REAL DEFAULT 0.20,
             ordering_cost REAL DEFAULT 25.0,
             service_level REAL DEFAULT 0.95,
+            dias_laborables INTEGER DEFAULT 365,
+            moneda TEXT DEFAULT 'USD',
             demanda_anual_global REAL DEFAULT 1200.0,
             desviacion_estandar REAL DEFAULT 2.5,
             penalizacion_faltante REAL DEFAULT 5.0
@@ -54,9 +62,27 @@ def init_db():
     cursor.execute("SELECT COUNT(*) FROM configuracion")
     if cursor.fetchone()[0] == 0:
         cursor.execute("""
-            INSERT INTO configuracion (id, holding_cost_rate, ordering_cost, service_level, demanda_anual_global, desviacion_estandar, penalizacion_faltante)
-            VALUES (1, 0.20, 25.0, 0.95, 1200.0, 2.5, 5.0)
+            INSERT INTO configuracion (
+                id, nombre_negocio, holding_cost_rate, ordering_cost,
+                service_level, dias_laborables, moneda,
+                demanda_anual_global, desviacion_estandar, penalizacion_faltante
+            )
+            VALUES (1, 'Mi Negocio', 0.20, 25.0, 0.95, 365, 'USD', 1200.0, 2.5, 5.0)
         """)
+
+    # Migrate: add new columns if they don't exist (for existing DBs)
+    try:
+        cursor.execute("ALTER TABLE configuracion ADD COLUMN nombre_negocio TEXT DEFAULT 'Mi Negocio'")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE configuracion ADD COLUMN dias_laborables INTEGER DEFAULT 365")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE configuracion ADD COLUMN moneda TEXT DEFAULT 'USD'")
+    except sqlite3.OperationalError:
+        pass
 
     conn.commit()
     conn.close()
@@ -77,14 +103,9 @@ def upsert_producto(producto: ProductoBase):
             demanda_anual=excluded.demanda_anual,
             ventas_historicas=excluded.ventas_historicas
     """, (
-        producto.sku,
-        producto.nombre,
-        producto.costo_unitario,
-        producto.stock_actual,
-        producto.tiempo_entrega,
-        producto.proveedor,
-        producto.demanda_anual,
-        json.dumps(producto.ventas_historicas)
+        producto.sku, producto.nombre, producto.costo_unitario,
+        producto.stock_actual, producto.tiempo_entrega, producto.proveedor,
+        producto.demanda_anual, json.dumps(producto.ventas_historicas)
     ))
     conn.commit()
     conn.close()
@@ -163,10 +184,15 @@ def get_configuracion() -> Configuracion:
     conn.close()
     if not row:
         return Configuracion()
+    # Safe column access with defaults for migration
+    cols = row.keys()
     return Configuracion(
+        nombre_negocio=row["nombre_negocio"] if "nombre_negocio" in cols else "Mi Negocio",
         holding_cost_rate=row["holding_cost_rate"],
         ordering_cost=row["ordering_cost"],
         service_level=row["service_level"],
+        dias_laborables=row["dias_laborables"] if "dias_laborables" in cols else 365,
+        moneda=row["moneda"] if "moneda" in cols else "USD",
         demanda_anual_global=row["demanda_anual_global"],
         desviacion_estandar=row["desviacion_estandar"],
         penalizacion_faltante=row["penalizacion_faltante"]
@@ -178,17 +204,23 @@ def update_configuracion(config: Configuracion):
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE configuracion SET
+            nombre_negocio = ?,
             holding_cost_rate = ?,
             ordering_cost = ?,
             service_level = ?,
+            dias_laborables = ?,
+            moneda = ?,
             demanda_anual_global = ?,
             desviacion_estandar = ?,
             penalizacion_faltante = ?
         WHERE id = 1
     """, (
+        config.nombre_negocio,
         config.holding_cost_rate,
         config.ordering_cost,
         config.service_level,
+        config.dias_laborables,
+        config.moneda,
         config.demanda_anual_global,
         config.desviacion_estandar,
         config.penalizacion_faltante

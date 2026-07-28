@@ -1,10 +1,17 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
+
+  /* Brand */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+
+  /* Semantic */
   --color-success: #059669;
   --color-success-bg: #ecfdf5;
   --color-warning: #d97706;
@@ -13,13 +20,155 @@
   --color-danger-bg: #fef2f2;
 }
 
-body {
-  background: #f9fafb;
-  color: #111827;
-  font-family: var(--font-sans), system-ui, sans-serif;
+/* ─── LIGHT MODE ─────────────────────────────────────────────────────────── */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --border-primary: #e2e8f0;
+  --border-secondary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 }
 
+/* ─── DARK MODE ──────────────────────────────────────────────────────────── */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --border-primary: #334155;
+  --border-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --sidebar-bg: #1e293b;
+  --sidebar-border: #334155;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── BASE ───────────────────────────────────────────────────────────────── */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+  scrollbar-color: var(--border-primary) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+/* ─── TRANSITIONS ────────────────────────────────────────────────────────── */
+.transition-theme {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ─── GLASSMORPHISM CARD ─────────────────────────────────────────────────── */
+.glass-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.75rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.glass-card:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* ─── GRADIENT TEXT ──────────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── SKELETON ANIMATION ─────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-primary) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+/* ─── REACT FLOW OVERRIDES ───────────────────────────────────────────────── */
+.react-flow__node {
+  border-radius: 0.75rem !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__minimap {
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+}
+
+.react-flow__background {
+  background: var(--bg-primary) !important;
+}
+
+.react-flow__controls button {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-secondary) !important;
+  fill: var(--text-secondary) !important;
+}
+
+.react-flow__controls button:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+.react-flow__controls button svg {
+  fill: var(--text-secondary) !important;
+}
+
+.react-flow__minimap {
+  background: var(--bg-secondary) !important;
+}
+
+.react-flow__attribution {
+  background: transparent !important;
+  color: var(--text-tertiary) !important;
+}
+
+.react-flow__bg {
+  fill: var(--bg-primary) !important;
+}
+
+/* ─── DROPZONE ───────────────────────────────────────────────────────────── */
+.dropzone-active {
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.05) !important;
 }

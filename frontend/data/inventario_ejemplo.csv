@@ -1,0 +1,11 @@
+SKU,Nombre,Costo Unitario,Stock Actual,Tiempo Entrega,Proveedor,Demanda Anual,mes_1,mes_2,mes_3,mes_4,mes_5,mes_6,mes_7,mes_8,mes_9,mes_10,mes_11,mes_12
+SKU-001,Aceite de Motor 5W-30,12.50,45,7,AutoParts SA,1200,95,110,100,105,120,115,108,125,130,118,135,140
+SKU-002,Filtro de Aire Universal,4.80,120,5,FilterMax,2400,180,195,200,210,225,200,215,230,210,220,240,275
+SKU-003,Pastillas de Freno,18.90,15,10,BrakesPro,600,45,50,48,55,52,50,58,55,60,52,48,57
+SKU-004,Bujías NGK,3.20,200,3,NGK Bolivia,3600,280,300,310,290,320,305,315,330,295,310,340,305
+SKU-005,Líquido Refrigerante,8.50,30,7,CoolTech,900,70,75,78,80,72,85,75,82,90,68,78,97
+SKU-006,Amortiguador Delantero,45.00,8,15,SuspensionPlus,240,18,20,22,19,21,20,18,22,20,24,18,18
+SKU-007,Correa de Distribución,22.00,25,12,TimingParts,480,38,40,42,35,45,40,38,42,40,38,45,37
+SKU-008,Batería 12V 60Ah,65.00,12,8,PowerBat,360,28,30,32,30,28,35,30,32,28,34,30,23
+SKU-009,Foco LED H4,6.50,180,4,LightMax,1800,140,150,155,160,145,155,150,160,148,155,140,42
+SKU-010,Aceite Hidráulico ATF,15.00,55,6,HydroOil,720,55,60,58,65,62,60,58,65,60,55,62,60

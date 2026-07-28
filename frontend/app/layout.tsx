@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -14,9 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StockOptima - Panel de Control",
+  title: "StockOptima — Optimización Inteligente de Inventarios",
   description:
-    "Sistema universal de optimización de inventarios para pequeños y medianos comercios",
+    "Sistema inteligente de optimización de inventarios y precios para mercados emergentes. Modelos de Investigación Operativa aplicados a MIPYMES.",
+  keywords: ["inventarios", "EOQ", "investigación operativa", "MIPYMES", "optimización"],
 };
 
 export default function RootLayout({
@@ -27,13 +31,28 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex">
+      <body className="min-h-full flex transition-theme">
         <Sidebar />
-        <main className="flex-1 ml-64 min-h-screen">
-          <div className="p-8">{children}</div>
+        <main className="flex-1 ml-64 max-sm:ml-0 min-h-screen">
+          <ErrorBoundary>
+            <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">{children}</div>
+          </ErrorBoundary>
         </main>
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            style: {
+              background: "var(--bg-secondary)",
+              border: "1px solid var(--border-primary)",
+              color: "var(--text-primary)",
+            },
+          }}
+        />
       </body>
     </html>
   );
