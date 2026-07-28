@@ -13,9 +13,12 @@ import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { SkeletonChart } from "@/components/ui/Skeleton";
 import { getProducts, calculateForecast } from "@/services/apiService";
 import type { Product, ForecastResponse } from "@/types";
-import { TrendingUp, ChevronDown, Award, BookOpen, BarChart3 } from "lucide-react";
+import { toast } from "sonner";
+import { TrendingUp, Award, BookOpen, BarChart3, Package, AlertCircle } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
+
+const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 export default function ForecastPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,18 +26,42 @@ export default function ForecastPage() {
   const [loading, setLoading] = useState(true);
   const [forecasting, setForecasting] = useState(false);
   const [result, setResult] = useState<ForecastResponse | null>(null);
-  const [customSales, setCustomSales] = useState("120,135,110,140,155,130,145,160,125,150,165,140");
+  const [customSales, setCustomSales] = useState("");
+
+  const selectedProduct = products.find((p) => p.sku === selectedSku);
 
   const fetchProducts = useCallback(async () => {
     try {
       const data = await getProducts();
       setProducts(data);
-      if (data.length > 0) setSelectedSku(data[0].sku);
-    } catch { /* empty */ }
-    finally { setLoading(false); }
+      if (data.length > 0) {
+        setSelectedSku(data[0].sku);
+        const first = data[0];
+        if (first.ventas_historicas && first.ventas_historicas.length > 0) {
+          setCustomSales(first.ventas_historicas.join(", "));
+        }
+      }
+    } catch {
+      toast.error("Error al cargar productos", {
+        description: "No se pudo obtener la lista de productos del servidor.",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  const handleProductChange = (sku: string) => {
+    setSelectedSku(sku);
+    setResult(null);
+    const product = products.find((p) => p.sku === sku);
+    if (product && product.ventas_historicas && product.ventas_historicas.length > 0) {
+      setCustomSales(product.ventas_historicas.join(", "));
+    } else {
+      setCustomSales("");
+    }
+  };
 
   const handleForecast = async () => {
     const sales = customSales
@@ -42,26 +69,38 @@ export default function ForecastPage() {
       .map((s) => parseFloat(s.trim()))
       .filter((n) => !isNaN(n));
 
-    if (sales.length < 3) return;
+    if (sales.length < 3) {
+      toast.error("Datos insuficientes", {
+        description: "Ingresa al menos 3 valores de ventas mensuales separados por coma.",
+      });
+      return;
+    }
 
     setForecasting(true);
+    setResult(null);
     try {
       const res = await calculateForecast({ ventas_historicas: sales });
       setResult(res);
-    } catch { /* empty */ }
-    finally { setForecasting(false); }
+      toast.success("Pronóstico completado", {
+        description: `Mejor método: ${res.mejor_metodo} — Siguiente período: ${res.mejor_pronostico.toFixed(2)} unidades.`,
+      });
+    } catch (err) {
+      toast.error("Error al calcular pronóstico", {
+        description: err instanceof Error ? err.message : "Ocurrió un error inesperado.",
+      });
+    } finally {
+      setForecasting(false);
+    }
   };
 
   if (loading) {
     return (
       <div>
-        <PageHeader title="Pronóstico de Demanda" description="Predice la demanda futura" />
+        <PageHeader title="Pronóstico de Demanda" description="Predice la demanda futura usando modelos de series de tiempo" />
         <SkeletonChart />
       </div>
     );
   }
-
-  const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
   return (
     <div>
@@ -83,7 +122,7 @@ export default function ForecastPage() {
           </div>
         </div>
 
-        {/* Sales Input */}
+        {/* Product Selector + Sales Input */}
         <Card>
           <CardHeader>
             <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -91,30 +130,88 @@ export default function ForecastPage() {
             </h3>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Product Selector */}
+            {products.length > 0 && (
+              <div>
+                <label className="block text-xs font-medium mb-2" style={{ color: "var(--text-tertiary)" }}>
+                  Seleccionar producto (carga sus ventas históricas)
+                </label>
+                <div className="relative">
+                  <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-tertiary)" }} />
+                  <select
+                    value={selectedSku}
+                    onChange={(e) => handleProductChange(e.target.value)}
+                    className="w-full rounded-lg border px-9 py-2.5 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ background: "var(--bg-secondary)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+                  >
+                    {products.map((p) => (
+                      <option key={p.sku} value={p.sku}>
+                        {p.sku} — {p.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="w-4 h-4" style={{ color: "var(--text-tertiary)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                {selectedProduct && (
+                  <p className="text-xs mt-1.5" style={{ color: "var(--text-tertiary)" }}>
+                    Stock actual: {selectedProduct.current_stock} | Demanda anual: {selectedProduct.annual_demand_estimated} | Status: {selectedProduct.status}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--text-tertiary)" }}>
-                Ingresa las ventas mensuales separadas por comas (mínimo 3 períodos)
+                Ventas mensuales separadas por comas (mínimo 3 períodos)
               </label>
               <textarea
                 value={customSales}
                 onChange={(e) => setCustomSales(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
                 placeholder="120, 135, 110, 140, 155, 130..."
               />
+              <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>
+                {(() => {
+                  const nums = customSales.split(",").map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
+                  return nums.length === 0
+                    ? "No se detectaron valores numéricos"
+                    : `${nums.length} valor(es) detectado(s) — ${nums.length < 3 ? "se necesitan al menos 3" : "listo para pronosticar"}`;
+                })()}
+              </p>
             </div>
+
             <motion.button
               onClick={handleForecast}
               disabled={forecasting}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-              whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              whileTap={forecasting ? undefined : { scale: 0.97 }}
             >
               <TrendingUp className="w-4 h-4" />
-              {forecasting ? "Calculando..." : "Pronosticar"}
+              {forecasting ? "Pronosticando..." : "Pronosticar"}
             </motion.button>
           </CardContent>
         </Card>
+
+        {/* No products warning */}
+        {products.length === 0 && !loading && (
+          <div className="rounded-xl border p-4 flex items-start gap-3" style={{ background: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
+            <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                No hay productos cargados
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                Sube un archivo CSV desde la sección Inventario para cargar productos con sus ventas históricas, o ingresa los valores manualmente arriba.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Results */}
         {result && (
@@ -153,7 +250,7 @@ export default function ForecastPage() {
                     <Line
                       data={{
                         labels: result.historico.map((_, i) =>
-                          i < monthLabels.length ? monthLabels[i] : `P${i + 1}`
+                          i < MESES.length ? MESES[i] : `P${i + 1}`
                         ),
                         datasets: [
                           {

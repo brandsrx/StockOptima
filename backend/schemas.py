@@ -64,6 +64,7 @@ class ProductoResponse(BaseModel):
     discount_price: Optional[float] = None
     status: str
     explanation: str = ""
+    ventas_historicas: list[float] = []
 
 
 class UploadResponse(BaseModel):
@@ -142,7 +143,7 @@ class ForecastRequest(BaseModel):
 class ForecastMethodResult(BaseModel):
     nombre: str
     pronostico_siguiente: float
-    serie_pronostico: list[float]
+    serie_pronostico: list[float | None]
     mae: float
     rmse: float
     parametros: dict

@@ -194,7 +194,8 @@ def procesar_producto(producto: ProductoBase, config: Configuracion) -> Producto
         discount_applied=discount["aplicado"],
         discount_quantity=discount["cantidad_sugerida"],
         discount_price=discount["precio_unitario"],
-        status=status
+        status=status,
+        ventas_historicas=producto.ventas_historicas or []
     )
 
 

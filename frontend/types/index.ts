@@ -24,6 +24,7 @@ export interface Product {
   discount_price: number | null;
   status: "Óptimo" | "En Reorden" | "Crítico";
   explanation: string;
+  ventas_historicas: number[];
 }
 
 // ─── CONFIGURACIÓN ──────────────────────────────────────────────────────────
